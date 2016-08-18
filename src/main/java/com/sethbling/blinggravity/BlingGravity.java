@@ -70,9 +70,23 @@ implements Listener {
         	
     public void UpdateVelocitiesFor(Entity e) {
     	
-        Vector newv = e.getVelocity().clone();
+    	Vector newv = e.getVelocity().clone();
         UUID uuid = e.getUniqueId();
-        if (this.velocities.containsKey(uuid) && this.onGround.containsKey(uuid) && !e.isOnGround() && !e.isInsideVehicle()) {
+
+    	Player player = null;
+    	if (e instanceof Player) {
+    		player = (Player)e;
+    		if (player.isDead() || player.isFlying() || player.isGliding() || player.isInsideVehicle() || player.isSneaking()) {
+    			if (this.positions.containsKey(uuid)) {
+	    	        this.velocities.remove(uuid);
+	    	        this.positions.remove(uuid);
+	    	        this.onGround.remove(uuid);
+    			}
+    			return;
+    		}
+    	}
+
+        if (this.velocities.containsKey(uuid) && this.onGround.containsKey(uuid) && !e.isOnGround()) {
             Vector oldv = this.velocities.get(uuid);
             if (!this.onGround.get(uuid).booleanValue()) {
                 Vector d = oldv.clone();
@@ -82,22 +96,22 @@ implements Listener {
                     boolean oldzchanged;
                     boolean oldxchanged;
                     newv.setY(oldv.getY() - dy * gravity);
-                    
+
                     boolean newxchanged = newv.getX() < -0.001 || newv.getX() > 0.001;
                     oldxchanged = oldv.getX() < -0.001 || oldv.getX() > 0.001;
                     if (newxchanged && oldxchanged) {
-                        newv.setX(oldv.getX());
+                        newv.setX((oldv.getX() + newv.getX()) / 2);
                     }
                     
                     boolean newzchanged = newv.getZ() < -0.001 || newv.getZ() > 0.001;
                     oldzchanged = oldv.getZ() < -0.001 || oldv.getZ() > 0.001;
                     if (newzchanged && oldzchanged) {
-                        newv.setZ(oldv.getZ());
+                        newv.setZ((oldv.getZ() + newv.getZ()) / 2);
                     }
-                    
+
                     e.setVelocity(newv.clone());
                 }
-            } else if (e instanceof Player && this.positions.containsKey(uuid)) {
+            } else if (player != null && this.positions.containsKey(uuid)) {
                 Vector pos = e.getLocation().toVector();
                 Vector oldpos = this.positions.get(uuid).toVector();
                 Vector velocity = pos.subtract(oldpos);
