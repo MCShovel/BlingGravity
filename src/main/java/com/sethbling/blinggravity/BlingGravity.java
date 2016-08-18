@@ -11,7 +11,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageModifier;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -23,7 +28,6 @@ implements Listener {
     protected HashMap<UUID, Location> positions;
     protected HashMap<UUID, Boolean> onGround;
 	private int tickUpdate;
-	private double fallDamage;
 	double gravity;
 	private boolean applyPlayers;
 	private boolean applyEntities;
@@ -50,7 +54,15 @@ implements Listener {
     public void onDisable() {
         this.getLogger().info("BlingGravity has been unloaded.");
     }
-    
+
+    private void clearPlayer(UUID uuid) {
+    	if (this.positions.containsKey(uuid)) {
+	        this.velocities.remove(uuid);
+	        this.positions.remove(uuid);
+	        this.onGround.remove(uuid);
+		}
+	}
+
     public void UpdateVelocities() {
         for (World world : this.getServer().getWorlds()) {
         	if (applyEntities) {
@@ -77,11 +89,7 @@ implements Listener {
     	if (e instanceof Player) {
     		player = (Player)e;
     		if (player.isDead() || player.isFlying() || player.isGliding() || player.isInsideVehicle() || player.isSneaking()) {
-    			if (this.positions.containsKey(uuid)) {
-	    	        this.velocities.remove(uuid);
-	    	        this.positions.remove(uuid);
-	    	        this.onGround.remove(uuid);
-    			}
+    			clearPlayer(uuid);
     			return;
     		}
     	}
@@ -125,6 +133,36 @@ implements Listener {
         this.positions.put(uuid, e.getLocation());
     }
 
+	@EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+    	clearPlayer(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent e) {
+    	clearPlayer(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onGameModeChange(PlayerGameModeChangeEvent e) {
+    	clearPlayer(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+    	clearPlayer(e.getEntity().getUniqueId());
+    }
+
+    @EventHandler
+    public void onChangedWorld(PlayerChangedWorldEvent e) {
+    	clearPlayer(e.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent e) {
+    	clearPlayer(e.getPlayer().getUniqueId());
+    }
+    
     @EventHandler(priority=EventPriority.HIGHEST)
     public void onEntityDamageEvent(EntityDamageEvent e) {
      	if (e.getCause() == EntityDamageEvent.DamageCause.FALL) {
