@@ -1,0 +1,8 @@
+
+ticks: 1
+gravity: 0.25
+
+apply:
+  players: true
+  entities: false
+

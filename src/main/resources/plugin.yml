@@ -4,3 +4,11 @@ version: 0.1
 description: Altered gravity zones.
 author: SethBling
 website: http://sethbling.com
+
+commands:
+  gravity:
+    usage: /<command> [value]
+    description: Changes the world's current gravity.
+    permission: BlingGravity.admin
+    permission-message: '§4You do not have permission to perform this action.'
+    default: op
