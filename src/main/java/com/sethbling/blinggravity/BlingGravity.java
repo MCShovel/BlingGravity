@@ -4,6 +4,7 @@ import com.sethbling.blinggravity.GravityTask;
 import java.util.HashMap;
 import java.util.UUID;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 public class BlingGravity
@@ -70,17 +72,17 @@ implements Listener {
         			if (!applyPlayers && e instanceof Player) { 
         				continue; 
     				}
-        			UpdateVelocitiesFor(e);
+        			UpdateVelocitiesFor(world, e);
         		}
         	} else if (applyPlayers) {
 				for (Entity e : world.getPlayers()) {
-					UpdateVelocitiesFor(e);
+					UpdateVelocitiesFor(world, e);
 				}
 			}
         }
     }    	
         	
-    public void UpdateVelocitiesFor(Entity e) {
+    public void UpdateVelocitiesFor(World world, Entity e) {
     	
     	Vector newv = e.getVelocity().clone();
         UUID uuid = e.getUniqueId();
@@ -89,6 +91,17 @@ implements Listener {
     	if (e instanceof Player) {
     		player = (Player)e;
     		if (player.isDead() || player.isFlying() || player.isGliding() || player.isInsideVehicle() || player.isSneaking()) {
+    			clearPlayer(uuid);
+    			return;
+    		}
+    		Material t = world.getBlockAt(e.getLocation()).getType();
+    		if (t == Material.LADDER 
+    				|| t == Material.WATER || t == Material.STATIONARY_WATER
+    				|| t == Material.LAVA || t == Material.STATIONARY_LAVA) {
+    			clearPlayer(uuid);
+    			return;
+    		}
+    		if (player.hasPotionEffect(PotionEffectType.LEVITATION)) {
     			clearPlayer(uuid);
     			return;
     		}
