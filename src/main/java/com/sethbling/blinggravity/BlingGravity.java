@@ -114,9 +114,10 @@ implements Listener {
                 d.subtract(newv);
                 double dy = d.getY();
                 if (dy > 0.0 && (newv.getY() < -0.01 || newv.getY() > 0.01)) {
+                    newv.setY(oldv.getY() - dy * gravity);
+/*
                     boolean oldzchanged;
                     boolean oldxchanged;
-                    newv.setY(oldv.getY() - dy * gravity);
 
                     boolean newxchanged = newv.getX() < -0.001 || newv.getX() > 0.001;
                     oldxchanged = oldv.getX() < -0.001 || oldv.getX() > 0.001;
@@ -129,16 +130,16 @@ implements Listener {
                     if (newzchanged && oldzchanged) {
                         newv.setZ((oldv.getZ() + newv.getZ()) / 2);
                     }
-
+*/
                     e.setVelocity(newv.clone());
                 }
-            } else if (player != null && this.positions.containsKey(uuid)) {
+            }/* else if (player != null && this.positions.containsKey(uuid)) {
                 Vector pos = e.getLocation().toVector();
                 Vector oldpos = this.positions.get(uuid).toVector();
                 Vector velocity = pos.subtract(oldpos);
                 newv.setX(velocity.getX());
                 newv.setZ(velocity.getZ());
-            }
+            }*/
             e.setVelocity(newv.clone());
         }
         this.velocities.put(uuid, newv.clone());
